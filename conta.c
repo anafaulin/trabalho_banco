@@ -1,16 +1,20 @@
 #include "conta.h"
+#include <stdio.h>
+#include <string.h>
 
-// Encontra uma conta pelo número
+//  FUNÇÕES DE BUSCA :)
+
+// Encontrar conta pelo número
 int encontrar_conta_por_numero(const Conta contas[], int qtd, int numero) {
     for (int i = 0; i < qtd; i++) {
         if (contas[i].numero == numero) {
-            return i; // posição no vetor
+            return i; // retorna índice da conta
         }
     }
-    return -1; // não encontrou
+    return -1; // não encontrado
 }
 
-// Encontra uma conta pelo CPF
+// Encontrar conta pelo CPF
 int encontrar_conta_por_cpf(const Conta contas[], int qtd, const char* cpf) {
     for (int i = 0; i < qtd; i++) {
         if (strcmp(contas[i].cpf, cpf) == 0 && contas[i].status == ATIVA) {
@@ -20,19 +24,23 @@ int encontrar_conta_por_cpf(const Conta contas[], int qtd, const char* cpf) {
     return -1;
 }
 
-// Abre uma nova conta
+// ABRIR CONTA 
 int abrir_conta(Conta contas[], int* qtd, const char* nome, const char* cpf,
                 const char* agencia, const char* telefone) {
+
+    // Limite de contas
     if (*qtd >= MAX_CONTAS) {
-        printf("Limite máximo de contas atingido\n");
+        printf("Erro: limite máximo de contas atingido.\n");
         return 0;
     }
 
+    // Verifica se CPF já existe
     if (encontrar_conta_por_cpf(contas, *qtd, cpf) != -1) {
-        printf("Já existe uma conta com esse CPF\n");
+        printf("Erro: já existe uma conta com este CPF.\n");
         return 0;
     }
 
+    // Criação da nova conta
     Conta nova;
     nova.numero = *qtd + 1;
     strcpy(nova.nome, nome);
@@ -42,49 +50,37 @@ int abrir_conta(Conta contas[], int* qtd, const char* nome, const char* cpf,
     nova.saldo = 0.0;
     nova.status = ATIVA;
 
-    contas[*qtd] = nova;
+    contas[*qtd] = nova; // adiciona ao vetor
     (*qtd)++;
 
-    printf("Conta criada com sucesso! Número: %d\n", nova.numero);
+    printf("Conta criada com sucesso! :) Número: %d\n", nova.numero);
     return 1;
 }
 
-// Depositar dinheiro
+//  OPERAÇÕES FINANCEIRAS 
+
+// Depositar
 void depositar(Conta contas[], int qtd, const char* cpf, double valor) {
-    int i = encontrar_conta_por_cpf(contas, qtd, cpf);
-    if (i == -1) {
-        printf("Conta não encontrada.\n");
-        return;
-    }
-    if (valor <= 0) {
-        printf("Valor inválido para depósito.\n");
-        return;
-    }
-    contas[i].saldo += valor;
-    printf("Depósito de %.2f realizado com sucesso! Novo saldo: %.2f\n", valor, contas[i].saldo);
+    int idx = encontrar_conta_por_cpf(contas, qtd, cpf);
+    if (idx == -1) { printf("Conta não encontrada.\n"); return; }
+    if (valor <= 0) { printf("Valor inválido para depósito.\n"); return; }
+
+    contas[idx].saldo += valor;
+    printf("Depósito de R$ %.2f realizado! Novo saldo: R$ %.2f\n", valor, contas[idx].saldo);
 }
 
-
-// Sacar dinheiro
+// Sacar
 void sacar(Conta contas[], int qtd, const char* cpf, double valor) {
-    int i = encontrar_conta_por_cpf(contas, qtd, cpf);
-    if (i == -1) {
-        printf("Conta não encontrada.\n");
-        return;
-    }
-    if (valor <= 0) {
-        printf("Valor inválido para saque.\n");
-        return;
-    }
-    if (contas[i].saldo < valor) {
-        printf("Saldo insuficiente.\n");
-        return;
-    }
-    contas[i].saldo -= valor;
-    printf("Saque de %.2f realizado com sucesso! Novo saldo: %.2f\n", valor, contas[i].saldo);
+    int idx = encontrar_conta_por_cpf(contas, qtd, cpf);
+    if (idx == -1) { printf("Conta não encontrada.\n"); return; }
+    if (valor <= 0) { printf("Valor inválido para saque.\n"); return; }
+    if (contas[idx].saldo < valor) { printf("Saldo insuficiente.\n"); return; }
+
+    contas[idx].saldo -= valor;
+    printf("Saque de R$ %.2f realizado! Novo saldo: R$ %.2f\n", valor, contas[idx].saldo);
 }
 
-// Transferir dinheiro entre contas
+// Transferir
 void transferir(Conta contas[], int qtd, const char* cpf_origem, const char* cpf_destino, double valor) {
     int origem = encontrar_conta_por_cpf(contas, qtd, cpf_origem);
     int destino = encontrar_conta_por_cpf(contas, qtd, cpf_destino);
@@ -93,68 +89,52 @@ void transferir(Conta contas[], int qtd, const char* cpf_origem, const char* cpf
         printf("Conta de origem ou destino não encontrada.\n");
         return;
     }
-
-    if (valor <= 0) {
-        printf("Valor inválido para transferência.\n");
-        return;
-    }
-
-    if (contas[origem].saldo < valor) {
-        printf("Saldo insuficiente na conta de origem.\n");
-        return;
-    }
+    if (valor <= 0) { printf("Valor inválido para transferência.\n"); return; }
+    if (contas[origem].saldo < valor) { printf("Saldo insuficiente na conta de origem.\n"); return; }
 
     contas[origem].saldo -= valor;
     contas[destino].saldo += valor;
 
-    printf("Transferência de %.2f realizada com sucesso!\n", valor);
-    printf("Novo saldo da conta origem: %.2f\n", contas[origem].saldo);
-    printf("Novo saldo da conta destino: %.2f\n", contas[destino].saldo);
+    printf("Transferência de R$ %.2f realizada com sucesso!\n", valor);
+    printf("Novo saldo origem: R$ %.2f | destino: R$ %.2f\n", contas[origem].saldo, contas[destino].saldo);
 }
 
+//  CONSULTAS E ATUALIZAÇÕES :)
 
-// Consultar saldo e dados
+// Consultar dados
 void consultar(const Conta contas[], int qtd, const char* cpf) {
-    int i = encontrar_conta_por_cpf(contas, qtd, cpf);
-    if (i == -1) {
-        printf("Conta não encontrada.\n");
-        return;
-    }
+    int idx = encontrar_conta_por_cpf(contas, qtd, cpf);
+    if (idx == -1) { printf("Conta não encontrada.\n"); return; }
 
     printf("\n--- Dados da Conta ---\n");
-    printf("Número: %d\n", contas[i].numero);
-    printf("Nome: %s\n", contas[i].nome);
-    printf("CPF: %s\n", contas[i].cpf);
-    printf("Agência: %s\n", contas[i].agencia);
-    printf("Telefone: %s\n", contas[i].telefone);
-    printf("Saldo: %.2f\n", contas[i].saldo);
-    printf("Status: %s\n", contas[i].status == ATIVA ? "Ativa" : "Encerrada");
+    printf("Número: %d\n", contas[idx].numero);
+    printf("Nome: %s\n", contas[idx].nome);
+    printf("CPF: %s\n", contas[idx].cpf);
+    printf("Agência: %s\n", contas[idx].agencia);
+    printf("Telefone: %s\n", contas[idx].telefone);
+    printf("Saldo: R$ %.2f\n", contas[idx].saldo);
+    printf("Status: %s\n", contas[idx].status == ATIVA ? "Ativa" : "Encerrada");
 }
 
 // Atualizar telefone e agência
 void atualizar(Conta contas[], int qtd, const char* cpf, const char* novo_tel, const char* nova_agencia) {
-    int i = encontrar_conta_por_cpf(contas, qtd, cpf);
-    if (i == -1) {
-        printf("Conta não encontrada.\n");
-        return;
-    }
+    int idx = encontrar_conta_por_cpf(contas, qtd, cpf);
+    if (idx == -1) { printf("Conta não encontrada.\n"); return; }
 
-    strcpy(contas[i].telefone, novo_tel);
-    strcpy(contas[i].agencia, nova_agencia);
-
+    strcpy(contas[idx].telefone, novo_tel);
+    strcpy(contas[idx].agencia, nova_agencia);
     printf("Dados atualizados com sucesso!\n");
 }
 
+// LISTAGEM E ENCERRAMENTO :)
+
 // Listar todas as contas
 void listar_contas(const Conta contas[], int qtd) {
-    if (qtd == 0) {
-        printf("Nenhuma conta cadastrada.\n");
-        return;
-    }
+    if (qtd == 0) { printf("Nenhuma conta cadastrada.\n"); return; }
 
     printf("\n--- Lista de Contas ---\n");
     for (int i = 0; i < qtd; i++) {
-        printf("Número: %d | Nome: %s | CPF: %s | Saldo: %.2f | Status: %s\n",
+        printf("Número: %d | Nome: %s | CPF: %s | Saldo: R$ %.2f | Status: %s\n",
                contas[i].numero, contas[i].nome, contas[i].cpf,
                contas[i].saldo, contas[i].status == ATIVA ? "Ativa" : "Encerrada");
     }
@@ -162,12 +142,9 @@ void listar_contas(const Conta contas[], int qtd) {
 
 // Encerrar conta
 void encerrar_conta(Conta contas[], int* qtd, const char* cpf) {
-    int indice = encontrar_conta_por_cpf(contas, *qtd, cpf);
-    if (indice == -1) {
-        printf("Conta não encontrada.\n");
-        return;
-    }
+    int idx = encontrar_conta_por_cpf(contas, *qtd, cpf);
+    if (idx == -1) { printf("Conta não encontrada.\n"); return; }
 
-    contas[indice].status = ENCERRADA;
-    printf("Conta do CPF %s foi encerrada com sucesso.\n", cpf);
+    contas[idx].status = ENCERRADA;
+    printf("Conta do CPF %s encerrada com sucesso.\n", cpf);
 }
