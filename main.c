@@ -19,94 +19,87 @@ int main() {
         printf("8. Encerrar conta\n");
         printf("9. Sair\n");
         printf("==========================\n");
+        
+        printf(">>> RELATORIOS <<< :) \n");
+        printf("10. Saldo total do banco\n");
+        printf("11. Conta com maior e menor saldo\n");
+        printf("12. Listar contas com saldo abaixo de um valor\n");
+        printf("13. Listar contas ordenadas por saldo\n");
+        printf("=============================\n");
         printf("Escolha uma opcao: ");
-        scanf("%d", &op);
 
-        if (op == 1) {
-            char nome[TAM_NOME], cpf[TAM_CPF], agencia[TAM_AGENCIA], telefone[TAM_TELEFONE];
+        
 
-            printf("Nome: ");
-            scanf(" %[^\n]", nome);
-            printf("CPF: ");
-            scanf(" %[^\n]", cpf);
-            printf("Agencia: ");
-            scanf(" %[^\n]", agencia);
-            printf("Telefone: ");
-            scanf(" %[^\n]", telefone);
-
-            abrir_conta(contas, &qtd_contas, nome, cpf, agencia, telefone);
+        if (scanf("%d", &op) != 1) {
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF);
+            printf("Entrada inválida! Digite um número.\n");
+            continue;
         }
-        else if (op == 2){
-        	char cpf[TAM_CPF];
-        	float valor;
-        	printf("CPF da conta: ");
-            scanf(" %[^\n]", cpf);
-            printf("Valor do deposito: ");
-            scanf("%f", &valor);
-            printf("Valor depositado!");
-            depositar(contas, qtd_contas, cpf, valor);
-		}
-		 else if (op == 3) {
-            char cpf[TAM_CPF];
-            float valor;
-            printf("CPF da conta: ");
-            scanf(" %[^\n]", cpf);
-            printf("Valor do saque: ");
-            scanf("%f", &valor);
-            sacar(contas, qtd_contas, cpf, valor);
-        }
+ 
+        switch (op) {
+            
+            case 1:  // Abrir conta
+                menuAbrirConta(contas, &qtd_contas);
+                break;
 
-        else if (op == 4) {
-            char cpfOrigem[TAM_CPF], cpfDestino[TAM_CPF];
-            float valor;
-            printf("CPF origem: ");
-            scanf(" %[^\n]", cpfOrigem);
-            printf("CPF destino: ");
-            scanf(" %[^\n]", cpfDestino);
-            printf("Valor da transferencia: ");
-            scanf("%f", &valor);
-            transferir(contas, qtd_contas, cpfOrigem, cpfDestino, valor);
-        }
+            case 2:  // Depositar
+                menuDepositar(contas, qtd_contas);
+                break;
 
-        else if (op == 5) {
-            char cpf[TAM_CPF];
-            printf("CPF da conta: ");
-            scanf(" %[^\n]", cpf);
-            consultar(contas, qtd_contas, cpf);
-        }
+            case 3:  // Sacar
+                menuSacar(contas, qtd_contas);
+                break;
 
-        else if (op == 6) {
-            char cpf[TAM_CPF], novoTelefone[TAM_TELEFONE], novaAgencia[TAM_AGENCIA];
-            printf("CPF da conta: ");
-            scanf(" %[^\n]", cpf);
-            printf("Novo telefone: ");
-            scanf(" %[^\n]", novoTelefone);
-            printf("Nova agencia: ");
-            scanf(" %[^\n]", novaAgencia);
-            atualizar(contas, qtd_contas, cpf, novoTelefone, novaAgencia);
-        }
+            case 4:  // Transferir
+                menuTransferir(contas, qtd_contas);
+                break;
 
-        else if (op == 7) {
-            listar_contas(contas, qtd_contas);
-        }
+            case 5:  // Consultar conta
+                menuConsultar(contas, qtd_contas);
+                break;
 
-        else if (op == 8) {
-            char cpf[TAM_CPF];
-            printf("CPF da conta a encerrar: ");
-            scanf(" %[^\n]", cpf);
-            encerrar_conta(contas, &qtd_contas, cpf);
+            case 6:  // Atualizar dados
+                menuAtualizar(contas, qtd_contas);
+                break;
+
+            case 7:  // Listar todas as contas
+                listar_contas(contas, qtd_contas);
+                break;
+
+            case 8:  // Encerrar conta
+                menuEncerrarConta(contas, &qtd_contas);
+                break;
+
+            case 10: {  // Relatório: saldo total
+                double total = calcular_saldo_total(contas, qtd_contas);
+                printf("\nSaldo total do banco: R$ %.2f\n", total);
+                break;
+            }
+
+            case 11: // Relatório: maior e menor saldo
+                mostrar_maior_menor_saldo(contas, qtd_contas);
+                break;
+
+            case 12: // Relatório: contas com saldo abaixo de um valor
+                listar_contas_saldo_baixo(contas, qtd_contas);
+                break;
+
+            case 13: // Relatório: contas ordenadas por saldo
+                listar_contas_ordenadas(contas, qtd_contas);
+                break;
+
+            case 9:  // Sair
+                printf("\nEncerrando o sistema...\n");
+                break;
+
+            default: // Opção inválida
+                printf("Opção inválida! Tente novamente.\n");
+                break;
         }
 
-        else if (op == 9) {
-            printf("Saindo do sistema...\n");
-            continuar = 0;
-        }
-
-        else {
-            printf("Opcao invalida! Tente novamente.\n");
-        }
-
-    } while (continuar);
+    } while (op != 9);
 
     return 0;
 }
+
